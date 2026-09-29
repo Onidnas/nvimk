@@ -1,6 +1,14 @@
--- 1. Cargar ajustes básicos de Neovim PRIMERO
-require("config.options")
+local lsp_log = vim.lsp.log.get_filename()
+local max_lsp_log_size = 10 * 1024 * 1024
 
--- 2. Cargar lazy.nvim (gestor de plugins)
-require("config.lazy")
+local stat = vim.uv.fs_stat(lsp_log)
+if stat and stat.size > max_lsp_log_size then
+	local fd = vim.uv.fs_open(lsp_log, "w", 420)
+	if fd then
+		vim.uv.fs_close(fd)
+	end
+end
 
+vim.lsp.log.set_level(vim.log.levels.ERROR)
+require("salar.core")
+require("salar.lazy")
